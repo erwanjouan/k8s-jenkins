@@ -1,0 +1,35 @@
+- name: Patch to NodePort
+  shell: >
+    kubectl patch svc {{ jenkins.service_name }} -n '{{ k8s_namespace.build }}' 
+    --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
+  register: jenkins_nodeport
+
+- name: Search for Jenkins Service
+  kubernetes.core.k8s_info:
+    kind: Service
+    name: '{{ jenkins.service_name }}'
+    namespace: '{{ k8s_namespace.build }}'
+    label_selectors:
+      - app.kubernetes.io/name = {{ jenkins.service_name }}
+      - app.kubernetes.io/instance = {{ jenkins.service_name }}
+  register: jenkins_service
+
+- name: Search for Jenkins Pod
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: '{{ k8s_namespace.build }}'
+    label_selectors:
+      - app.kubernetes.io/name = jenkins
+      - app.kubernetes.io/instance = {{ jenkins.service_name }}
+  register: jenkins_pod
+
+- name: Get Jenkins admin password
+  kubernetes.core.k8s_exec:
+    namespace: '{{ k8s_namespace.build }}'
+    pod: '{{ jenkins_pod.resources[0].metadata.name }}'
+    command: /bin/cat /run/secrets/additional/chart-admin-password
+  register: jenkins_admin_password
+
+- name: Print Jenkins url and credentials
+  debug:
+    msg: "Jenkins localhost:{{ jenkins_service.resources[0].spec.ports[0].nodePort }} admin:{{ jenkins_admin_password.stdout }}"

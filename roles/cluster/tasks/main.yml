@@ -1,0 +1,16 @@
+
+- name: dependencies
+  include_tasks: dependencies.yml
+  when: mode == "deploy"
+
+- name: namespace
+  include_tasks: namespace.yml
+  when: mode == "deploy"
+
+- name: rbac
+  include_tasks: rbac.yml
+  when: mode == "deploy"
+
+- name: undo
+  include_tasks: undo.yml
+  when: mode == "destroy"

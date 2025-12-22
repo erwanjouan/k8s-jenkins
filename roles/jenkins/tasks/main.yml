@@ -1,0 +1,7 @@
+- name: install
+  include_tasks: install.yml
+  when: mode == "deploy"
+
+- name: post install
+  include_tasks: post-install.yml
+  when: mode == "deploy"

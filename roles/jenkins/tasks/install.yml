@@ -1,0 +1,68 @@
+- name: Add Jenkins Helm repo
+  kubernetes.core.helm_repository:
+      name: jenkins
+      force_update: true
+      repo_url: https://charts.jenkins.io
+
+- name: Install Jenkins Helm Chart
+  kubernetes.core.helm:
+      name: '{{ jenkins.service_name }}'
+      release_namespace: '{{ k8s_namespace.build }}'
+      chart_ref: jenkins/jenkins
+      wait: true
+      values:
+        controller:
+          installPlugins: # base plugins should be specified when using this entry
+            - kubernetes
+            - git
+            - configuration-as-code
+            - workflow-multibranch
+            - workflow-aggregator
+            - job-dsl # added to persist jobs
+          JCasC:
+            configScripts:
+              welcome-message: |
+                jenkins:
+                  systemMessage: Welcome to k8s-cicd
+              scheduler-job: |
+                jobs:
+                  - script: >
+                      multibranchPipelineJob('scheduler') {
+                          branchSources {
+                              git {
+                                  id('scheduler')
+                                  remote('https://github.com/erwanjouan/test-tool-backend.git')
+                              }
+                          }
+                          factory {
+                            workflowBranchProjectFactory {
+                                scriptPath('cicd/Jenkinsfile')
+                            }
+                          }
+                      }
+
+- name: Checks kaniko-config secret exists
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: '{{ jenkins.kaniko_secret_name }}'
+    namespace: '{{ k8s_namespace.build }}'
+  register: kaniko_config_exists
+
+- name: Creating kaniko-config config.json
+  template:
+    src: config.json.j2
+    dest: config.json
+
+- name: Creating kaniko-config
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: '{{ jenkins.kaniko_secret_name }}'
+        namespace: '{{ k8s_namespace.build }}'
+      data:
+        config.json: "{{ lookup('file','config.json') | b64encode }}"
