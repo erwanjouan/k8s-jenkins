@@ -3,4 +3,7 @@
 
   roles:
     - role: cluster
+    #- role: dashboard
     - role: jenkins
+    - role: grafana
+    - role: ingress

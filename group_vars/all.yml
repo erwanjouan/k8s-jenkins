@@ -1,15 +1,10 @@
 k8s_namespace:
   build: ci
   run: run
-registry:
-  port: 5001
-  name: local
-  user: myuser
-  password: mypassword
-  service_name: docker-registry-integ
 jenkins:
   port: 8080
   service_name: jenkins
+  path: /jenkins
   m2_settings_secretname: m2-settings
   kube_config_secretname: kube-config
   maven_repo_pvc: maven-repo
@@ -20,4 +15,7 @@ nexus:
 postgresql:
   port: 5432
   service_name: my-postgresql
-flag_undo: false
+grafana:
+  service_name: my-grafana
+  path: /grafana
+  port: 80

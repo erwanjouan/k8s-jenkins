@@ -1,0 +1,42 @@
+- name: Add Ingress Helm repo
+  kubernetes.core.helm_repository:
+      name: ingress-nginx
+      #force_update: true
+      repo_url: https://kubernetes.github.io/ingress-nginx
+
+- name: Install ingress-nginx  Helm Chart
+  kubernetes.core.helm:
+      name: ingress-nginx
+      release_namespace: '{{ k8s_namespace.build }}'
+      create_namespace: true
+      chart_ref: ingress-nginx/ingress-nginx
+      wait: true
+
+- name: Creating Ingress
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: webapp-ingress
+        namespace: '{{ k8s_namespace.build }}'
+      spec:
+        ingressClassName: nginx
+        rules:
+          - http:
+              paths:
+                - path: '{{ jenkins.path }}'
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: '{{ jenkins.service_name }}'
+                      port:
+                        number: '{{ jenkins.port }}'
+                - path: '{{ grafana.path }}'
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: '{{ grafana.service_name }}'
+                      port:
+                        number: '{{ grafana.port }}'

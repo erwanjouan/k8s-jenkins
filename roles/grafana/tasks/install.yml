@@ -1,0 +1,26 @@
+- name: Add Grafana Helm repo
+  kubernetes.core.helm_repository:
+      name: grafana-community
+      #force_update: true
+      repo_url: https://grafana-community.github.io/helm-charts
+
+- name: Install Grafana Helm Chart
+  kubernetes.core.helm:
+      name: '{{ grafana.service_name }}'
+      release_namespace: '{{ k8s_namespace.build }}'
+      chart_ref: grafana-community/grafana
+      wait: true
+      values:
+        adminPassword: admin
+        grafana.ini:
+          server:
+            root_url: 'http://localhost:3000{{ grafana.path }}'
+            serve_from_sub_path: true
+
+- name: Get Grafana password
+  shell: 'kubectl get secret --namespace {{ k8s_namespace.build }} my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo'
+  register: grafana_password
+
+- name: Print Grafana credentials
+  debug:
+    msg: "Jenkins admin {{ grafana_password }}"

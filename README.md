@@ -12,6 +12,14 @@ helm -n ci get values jenkins
 helm show values jenkins
 ```
 
-https://www.youtube.com/watch?v=KKQWXtRmxcE
+- https://www.youtube.com/watch?v=KKQWXtRmxcE
 
-➜  ~ kubectl patch svc jenkins -n ci --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'        
+## Jenkins
+
+```shell
+kubectl patch svc jenkins -n ci --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'        
+```
+
+## Grafana
+
+- https://grafana.com/docs/grafana/latest/setup-grafana/installation/helm/

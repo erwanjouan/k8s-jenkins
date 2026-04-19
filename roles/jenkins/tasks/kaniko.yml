@@ -1,0 +1,25 @@
+- name: Checks kaniko-config secret exists
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: '{{ jenkins.kaniko_secret_name }}'
+    namespace: '{{ k8s_namespace.build }}'
+  register: kaniko_config_exists
+
+- name: Creating kaniko-config config.json
+  template:
+    src: config.json.j2
+    dest: config.json
+
+- name: Creating kaniko-config
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: '{{ jenkins.kaniko_secret_name }}'
+        namespace: '{{ k8s_namespace.build }}'
+      data:
+        config.json: "{{ lookup('file','config.json') | b64encode }}"

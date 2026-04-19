@@ -2,6 +2,10 @@
   include_tasks: install.yml
   when: mode == "deploy"
 
-- name: post install
-  include_tasks: post-install.yml
+- name: kaniko
+  include_tasks: kaniko.yml
+  when: mode == "deploy"
+
+- name: login
+  include_tasks: credentials.yml
   when: mode == "deploy"
