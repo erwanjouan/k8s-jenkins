@@ -24,6 +24,12 @@ spec:
       image: maven:3-eclipse-temurin-25
       command: [cat]
       tty: true
+      env:
+        - name: SONAR_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: sonarqube-token
+              key: token
       volumeMounts:
         - mountPath: /root/jenkins_home
           name: jenkins-m2-cache
@@ -34,6 +40,12 @@ spec:
       image: sonarsource/sonar-scanner-cli
       command: [cat]
       tty: true
+      env:
+        - name: SONAR_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: sonarqube-token
+              key: token
     - name: kaniko
       image: gcr.io/kaniko-project/executor:debug
       command: [sleep]
@@ -97,7 +109,7 @@ spec:
                         dir('backend') {
                             container('maven') {
                                 withSonarQubeEnv('SonarQube') {
-                                    sh "mvn -Dmaven.repo.local=/root/jenkins_home/.m2 sonar:sonar -Dsonar.projectKey=${appName}-backend"
+                                    sh "mvn -Dmaven.repo.local=/root/jenkins_home/.m2 sonar:sonar -Dsonar.projectKey=${appName}-backend -Dsonar.token=\${SONAR_TOKEN}"
                                 }
                             }
                         }
@@ -111,7 +123,8 @@ spec:
                                         sh """sonar-scanner \
                                             -Dsonar.projectKey=${appName}-frontend \
                                             -Dsonar.sources=src \
-                                            -Dsonar.exclusions=node_modules/**,dist/**"""
+                                            -Dsonar.exclusions=node_modules/**,dist/** \
+                                            -Dsonar.token=\${SONAR_TOKEN}"""
                                     }
                                 }
                             }
