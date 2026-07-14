@@ -22,6 +22,12 @@
         grafana.ini:
           server:
             root_url: 'http://{{ grafana.host }}'
+          auth.anonymous:
+            enabled: true
+            org_name: Main Org.
+            org_role: Admin
+          auth:
+            disable_login_form: false
         datasources:
           datasources.yaml:
             apiVersion: 1

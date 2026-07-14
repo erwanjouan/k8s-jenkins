@@ -17,6 +17,8 @@
       account:
         adminPassword: admin
         currentAdminPassword: admin
+      sonarProperties:
+        sonar.forceAuthentication: "false"
       resources:
         requests:
           cpu: 200m

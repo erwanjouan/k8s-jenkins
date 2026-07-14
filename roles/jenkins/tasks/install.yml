@@ -45,6 +45,7 @@
               welcome-message: |
                 jenkins:
                   systemMessage: Welcome to k8s-cicd
+                  authorizationStrategy: unsecured
               sonarqube-config: |
                 unclassified:
                   sonarGlobalConfiguration:
