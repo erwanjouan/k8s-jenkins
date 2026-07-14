@@ -11,20 +11,37 @@
       chart_ref: jenkins/jenkins
       wait: true
       values:
+        agent:
+          volumes:
+            - type: Secret
+              secretName: '{{ jenkins.m2_settings_secretname }}'
+              mountPath: /root/.m2
         controller:
-          jenkinsUriPrefix: '{{ jenkins.path }}'
           installPlugins: # base plugins should be specified when using this entry
             - kubernetes
             - git
             - configuration-as-code
             - workflow-multibranch
             - workflow-aggregator
+            - workflow-cps-global-lib
             - job-dsl # added to persist jobs
           JCasC:
             configScripts:
               welcome-message: |
                 jenkins:
                   systemMessage: Welcome to k8s-cicd
+              shared-library: |
+                unclassified:
+                  globalLibraries:
+                    libraries:
+                      - name: k8s-cicd
+                        defaultVersion: main
+                        allowVersionOverride: true
+                        retriever:
+                          modernSCM:
+                            scm:
+                              git:
+                                remote: https://github.com/erwanjouan/k8s-jenkins.git
               scheduler-job: |
                 jobs:
                   - script: >

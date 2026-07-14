@@ -1,12 +1,11 @@
 - name: Add Nexus helm repo
   kubernetes.core.helm_repository:
-      name: sonatype
-      repo_url: https://sonatype.github.io/helm3-charts/
+    name: sonatype
+    repo_url: https://sonatype.github.io/helm3-charts/
 
 - name: Install Nexus Helm Chart
   kubernetes.core.helm:
     name: '{{ nexus.service_name }}'
-    namespace: '{{ k8s_build_namespace }}'
+    release_namespace: '{{ k8s_namespace.build }}'
     chart_ref: sonatype/nexus-repository-manager
-    create_namespace: true
     wait: true

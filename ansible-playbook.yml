@@ -3,7 +3,10 @@
 
   roles:
     - role: cluster
-    #- role: dashboard
+    - role: nexus
     - role: jenkins
+    - role: loki
+    - role: alloy
+    - role: prometheus
     - role: grafana
     - role: ingress

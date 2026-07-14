@@ -1,0 +1,104 @@
+- name: Add Grafana Helm repo
+  kubernetes.core.helm_repository:
+    name: grafana
+    repo_url: https://grafana.github.io/helm-charts
+
+- name: Install Grafana Alloy Helm Chart
+  kubernetes.core.helm:
+    name: alloy
+    release_namespace: '{{ k8s_namespace.build }}'
+    chart_ref: grafana/alloy
+    wait: true
+    values:
+      alloy:
+        mounts:
+          varlog: true
+          dockercontainers: true
+        configMap:
+          content: |
+            discovery.kubernetes "pods" {
+              role = "pod"
+            }
+
+            discovery.relabel "pod_logs" {
+              targets = discovery.kubernetes.pods.targets
+
+              rule {
+                source_labels = ["__meta_kubernetes_pod_controller_name"]
+                regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
+                target_label  = "__tmp_controller_name"
+              }
+              rule {
+                source_labels = [
+                  "__meta_kubernetes_pod_label_app_kubernetes_io_name",
+                  "__meta_kubernetes_pod_label_app",
+                  "__tmp_controller_name",
+                  "__meta_kubernetes_pod_name",
+                ]
+                regex        = "^;*([^;]+)(;.*)?$"
+                target_label = "app"
+              }
+              rule {
+                source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_instance"]
+                target_label  = "instance"
+              }
+              rule {
+                source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component"]
+                target_label  = "component"
+              }
+              rule {
+                source_labels = ["__meta_kubernetes_pod_node_name"]
+                target_label  = "node_name"
+              }
+              rule {
+                source_labels = ["__meta_kubernetes_namespace"]
+                target_label  = "namespace"
+              }
+              rule {
+                source_labels = ["namespace", "app"]
+                separator    = "/"
+                target_label = "job"
+              }
+              rule {
+                source_labels = ["__meta_kubernetes_pod_name"]
+                target_label  = "pod"
+              }
+              rule {
+                source_labels = ["__meta_kubernetes_pod_container_name"]
+                target_label  = "container"
+              }
+              rule {
+                source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+                separator    = "/"
+                replacement  = "/var/log/pods/*$1/*.log"
+                target_label = "__path__"
+              }
+            }
+
+            loki.process "pod_logs" {
+              forward_to = [loki.write.default.receiver]
+
+              stage.docker {}
+
+              stage.labels {
+                values = {
+                  stream = "",
+                }
+              }
+            }
+
+            local.file_match "pod_logs" {
+              path_targets = discovery.relabel.pod_logs.output
+              sync_period  = "5s"
+            }
+
+            loki.source.file "pod_logs" {
+              targets    = local.file_match.pod_logs.targets
+              forward_to = [loki.process.pod_logs.receiver]
+            }
+
+            loki.write "default" {
+              endpoint {
+                url = "http://{{ loki.service_name }}:{{ loki.port }}/loki/api/v1/push"
+              }
+            }

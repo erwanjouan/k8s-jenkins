@@ -1,0 +1,16 @@
+- name: Add Grafana Helm repo
+  kubernetes.core.helm_repository:
+      name: grafana
+      repo_url: https://grafana.github.io/helm-charts
+
+- name: Install Loki Stack Helm Chart
+  kubernetes.core.helm:
+      name: '{{ loki.service_name }}'
+      release_namespace: '{{ k8s_namespace.build }}'
+      chart_ref: grafana/loki-stack
+      wait: true
+      values:
+        loki:
+          enabled: true
+        promtail:
+          enabled: false

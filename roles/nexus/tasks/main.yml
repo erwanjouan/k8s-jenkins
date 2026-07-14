@@ -1,3 +1,7 @@
-- name: nexus
+- name: install
   include_tasks: install.yml
+  when: mode == "deploy"
+
+- name: credentials
+  include_tasks: credentials.yml
   when: mode == "deploy"

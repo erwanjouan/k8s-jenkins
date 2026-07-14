@@ -4,7 +4,8 @@ k8s_namespace:
 jenkins:
   port: 8080
   service_name: jenkins
-  path: /jenkins
+  path: /
+  host: jenkins.local
   m2_settings_secretname: m2-settings
   kube_config_secretname: kube-config
   maven_repo_pvc: maven-repo
@@ -12,6 +13,7 @@ jenkins:
 nexus:
   port: 8081
   service_name: my-nexus-repository-manager
+  host: nexus.local
 postgresql:
   port: 5432
   service_name: my-postgresql
@@ -19,3 +21,11 @@ grafana:
   service_name: my-grafana
   path: /grafana
   port: 80
+  host: grafana.local
+loki:
+  service_name: loki
+  port: 3100
+prometheus:
+  release_name: prometheus
+  service_name: prometheus-kube-prometheus-prometheus
+  port: 9090

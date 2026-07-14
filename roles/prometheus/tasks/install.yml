@@ -1,0 +1,18 @@
+- name: Add Prometheus community Helm repo
+  kubernetes.core.helm_repository:
+      name: prometheus-community
+      repo_url: https://prometheus-community.github.io/helm-charts
+
+- name: Install kube-prometheus-stack Helm Chart
+  kubernetes.core.helm:
+      name: '{{ prometheus.release_name }}'
+      release_namespace: '{{ k8s_namespace.build }}'
+      chart_ref: prometheus-community/kube-prometheus-stack
+      wait: true
+      values:
+        grafana:
+          enabled: false
+        prometheus:
+          prometheusSpec:
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false

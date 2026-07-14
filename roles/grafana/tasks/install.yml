@@ -14,8 +14,59 @@
         adminPassword: admin
         grafana.ini:
           server:
-            root_url: 'http://localhost:3000{{ grafana.path }}'
-            serve_from_sub_path: true
+            root_url: 'http://{{ grafana.host }}'
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+              - name: Prometheus
+                type: prometheus
+                url: 'http://{{ prometheus.service_name }}:{{ prometheus.port }}'
+                access: proxy
+                isDefault: true
+              - name: Loki
+                type: loki
+                url: 'http://{{ loki.service_name }}:{{ loki.port }}'
+                access: proxy
+                isDefault: false
+        dashboardProviders:
+          dashboardproviders.yaml:
+            apiVersion: 1
+            providers:
+              - name: default
+                orgId: 1
+                folder: Kubernetes
+                type: file
+                disableDeletion: false
+                editable: true
+                options:
+                  path: /var/lib/grafana/dashboards/default
+        dashboards:
+          default:
+            kubernetes-cluster:
+              gnetId: 315
+              revision: 3
+              datasource: Prometheus
+            kubernetes-views-global:
+              gnetId: 15757
+              revision: 37
+              datasource: Prometheus
+            kubernetes-views-namespaces:
+              gnetId: 15758
+              revision: 35
+              datasource: Prometheus
+            kubernetes-views-nodes:
+              gnetId: 15759
+              revision: 29
+              datasource: Prometheus
+            kubernetes-views-pods:
+              gnetId: 15760
+              revision: 29
+              datasource: Prometheus
+            kubernetes-logs:
+              gnetId: 15141
+              revision: 1
+              datasource: Loki
 
 - name: Get Grafana password
   shell: 'kubectl get secret --namespace {{ k8s_namespace.build }} my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo'
@@ -23,4 +74,4 @@
 
 - name: Print Grafana credentials
   debug:
-    msg: "Jenkins admin {{ grafana_password }}"
+    msg: "Grafana URL: http://{{ grafana.host }} | admin password: {{ grafana_password.stdout }}"
