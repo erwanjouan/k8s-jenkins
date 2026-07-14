@@ -17,6 +17,13 @@ spec:
       image: node:19
       command: [cat]
       tty: true
+      resources:
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        limits:
+          cpu: "1"
+          memory: 2Gi
       volumeMounts:
         - mountPath: /root/jenkins_home
           name: jenkins-m2-cache
@@ -24,6 +31,13 @@ spec:
       image: maven:3-eclipse-temurin-25
       command: [cat]
       tty: true
+      resources:
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        limits:
+          cpu: "1"
+          memory: 2Gi
       env:
         - name: SONAR_TOKEN
           valueFrom:
@@ -40,6 +54,13 @@ spec:
       image: sonarsource/sonar-scanner-cli
       command: [cat]
       tty: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
       env:
         - name: SONAR_TOKEN
           valueFrom:
@@ -50,6 +71,13 @@ spec:
       image: gcr.io/kaniko-project/executor:debug
       command: [sleep]
       args: [99d]
+      resources:
+        requests:
+          cpu: 200m
+          memory: 256Mi
+        limits:
+          cpu: "1"
+          memory: 1Gi
       volumeMounts:
         - mountPath: /kaniko/.docker
           name: kaniko-secret
@@ -58,6 +86,13 @@ spec:
       image: docker.io/bitnami/kubectl
       command: [cat]
       tty: true
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
       securityContext:
         runAsUser: 1000
   volumes:

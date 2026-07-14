@@ -17,3 +17,10 @@
       account:
         adminPassword: admin
         currentAdminPassword: admin
+      resources:
+        requests:
+          cpu: 200m
+          memory: 1Gi
+        limits:
+          cpu: 800m
+          memory: 2Gi
