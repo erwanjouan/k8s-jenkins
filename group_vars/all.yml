@@ -14,6 +14,12 @@ nexus:
   port: 8081
   service_name: my-nexus-repository-manager
   host: nexus.local
+sonarqube:
+  release_name: sonarqube
+  service_name: sonarqube-sonarqube
+  port: 9000
+  host: sonarqube.local
+  token_secret: sonarqube-token
 postgresql:
   port: 5432
   service_name: my-postgresql

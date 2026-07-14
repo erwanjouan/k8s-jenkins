@@ -17,6 +17,13 @@
               secretName: '{{ jenkins.m2_settings_secretname }}'
               mountPath: /root/.m2
         controller:
+          extraEnvs:
+            - name: SONARQUBE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ sonarqube.token_secret }}'
+                  key: token
+                  optional: true
           installPlugins: # base plugins should be specified when using this entry
             - kubernetes
             - git
@@ -24,12 +31,30 @@
             - workflow-multibranch
             - workflow-aggregator
             - workflow-cps-global-lib
+            - sonar
             - job-dsl # added to persist jobs
           JCasC:
             configScripts:
               welcome-message: |
                 jenkins:
                   systemMessage: Welcome to k8s-cicd
+              sonarqube-config: |
+                unclassified:
+                  sonarGlobalConfiguration:
+                    buildWrapperEnabled: false
+                    installations:
+                      - name: SonarQube
+                        serverUrl: http://{{ sonarqube.service_name }}:{{ sonarqube.port }}
+                        credentialsId: sonarqube-token
+                credentials:
+                  system:
+                    domainCredentials:
+                      - credentials:
+                          - string:
+                              scope: GLOBAL
+                              id: sonarqube-token
+                              secret: "${SONARQUBE_TOKEN}"
+                              description: SonarQube analysis token
               shared-library: |
                 unclassified:
                   globalLibraries:

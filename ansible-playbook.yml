@@ -4,6 +4,7 @@
   roles:
     - role: cluster
     - role: nexus
+    - role: sonarqube
     - role: jenkins
     - role: loki
     - role: alloy

@@ -1,0 +1,16 @@
+- name: Add SonarQube Helm repo
+  kubernetes.core.helm_repository:
+    name: sonarqube
+    repo_url: https://SonarSource.github.io/helm-chart-sonarqube
+
+- name: Install SonarQube Helm Chart
+  kubernetes.core.helm:
+    name: '{{ sonarqube.release_name }}'
+    release_namespace: '{{ k8s_namespace.build }}'
+    chart_ref: sonarqube/sonarqube
+    wait: true
+    wait_timeout: 10m0s
+    values:
+      account:
+        adminPassword: admin
+        currentAdminPassword: admin

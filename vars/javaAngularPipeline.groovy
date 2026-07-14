@@ -1,5 +1,5 @@
 def call(Map config = [:]) {
-    def frontendUrl = config.frontendUrl   // optional — skip frontend stage if absent
+    def frontendUrl = config.frontendUrl   // optional — skip frontend stages if absent
     def backendUrl  = config.backendUrl    ?: error('backendUrl is required')
     def baseHref    = config.baseHref      ?: '/'
     def imageRepo   = config.imageRepo     ?: error('imageRepo is required')
@@ -27,6 +27,10 @@ spec:
       volumeMounts:
         - mountPath: /root/jenkins_home
           name: jenkins-m2-cache
+    - name: sonar-scanner
+      image: sonarsource/sonar-scanner-cli
+      command: [cat]
+      tty: true
     - name: kaniko
       image: gcr.io/kaniko-project/executor:debug
       command: [sleep]
@@ -77,11 +81,56 @@ spec:
                         container('maven') {
                             git branch: env.BRANCH_NAME, changelog: false, poll: false, url: backendUrl
                             sh 'mvn -Dmaven.repo.local=/root/jenkins_home/.m2 clean install'
+                        }
+                    }
+                }
+            }
+            stage('SonarQube') {
+                steps {
+                    script {
+                        dir('backend') {
+                            container('maven') {
+                                withSonarQubeEnv('SonarQube') {
+                                    sh "mvn -Dmaven.repo.local=/root/jenkins_home/.m2 sonar:sonar -Dsonar.projectKey=${appName}-backend"
+                                }
+                            }
+                        }
+                        timeout(time: 5, unit: 'MINUTES') {
+                            waitForQualityGate abortPipeline: true
+                        }
+                        if (frontendUrl) {
+                            dir('frontend') {
+                                container('sonar-scanner') {
+                                    withSonarQubeEnv('SonarQube') {
+                                        sh """sonar-scanner \
+                                            -Dsonar.projectKey=${appName}-frontend \
+                                            -Dsonar.sources=src \
+                                            -Dsonar.exclusions=node_modules/**,dist/**"""
+                                    }
+                                }
+                            }
+                            timeout(time: 5, unit: 'MINUTES') {
+                                waitForQualityGate abortPipeline: true
+                            }
+                        }
+                    }
+                }
+            }
+            stage('Package') {
+                steps {
+                    dir('backend') {
+                        container('maven') {
                             sh 'sed -e "s/CURRENT_GIT_COMMIT/$GIT_COMMIT/g" run/deployment.yml > deployment.yml'
                         }
                         container('kaniko') {
                             sh "/kaniko/executor --context `pwd` --dockerfile Dockerfile --customPlatform=linux/amd64 --destination ${imageRepo}:\${GIT_COMMIT}"
                         }
+                    }
+                }
+            }
+            stage('Deploy') {
+                steps {
+                    dir('backend') {
                         container('kubectl') {
                             sh 'kubectl apply -f deployment.yml'
                             sh "kubectl wait --for=condition=available deployment/${appName} -n run"

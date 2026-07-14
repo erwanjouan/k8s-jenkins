@@ -54,3 +54,13 @@
                       name: '{{ nexus.service_name }}'
                       port:
                         number: '{{ nexus.port }}'
+          - host: '{{ sonarqube.host }}'
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: '{{ sonarqube.service_name }}'
+                      port:
+                        number: '{{ sonarqube.port }}'
