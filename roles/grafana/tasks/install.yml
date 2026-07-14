@@ -80,11 +80,3 @@
               gnetId: 15141
               revision: 1
               datasource: Loki
-
-- name: Get Grafana password
-  shell: 'kubectl get secret --namespace {{ k8s_namespace.build }} my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo'
-  register: grafana_password
-
-- name: Print Grafana credentials
-  debug:
-    msg: "Grafana URL: http://{{ grafana.host }} | admin password: {{ grafana_password.stdout }}"

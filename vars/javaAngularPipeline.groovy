@@ -53,11 +53,11 @@ spec:
       tty: true
       resources:
         requests:
-          cpu: 100m
-          memory: 256Mi
-        limits:
-          cpu: 500m
+          cpu: 200m
           memory: 512Mi
+        limits:
+          cpu: "1"
+          memory: 2Gi
       env:
         - name: SONAR_TOKEN
           valueFrom:

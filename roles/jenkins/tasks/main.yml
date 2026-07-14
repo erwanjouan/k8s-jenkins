@@ -6,6 +6,3 @@
   include_tasks: kaniko.yml
   when: mode == "deploy"
 
-- name: login
-  include_tasks: credentials.yml
-  when: mode == "deploy"
