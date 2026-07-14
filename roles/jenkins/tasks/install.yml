@@ -17,6 +17,13 @@
               secretName: '{{ jenkins.m2_settings_secretname }}'
               mountPath: /root/.m2
         controller:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
           extraEnvs:
             - name: SONARQUBE_TOKEN
               valueFrom:
