@@ -11,6 +11,9 @@
     wait: true
     wait_timeout: 10m0s
     values:
+      community:
+        enabled: true
+      monitoringPasscode: admin
       account:
         adminPassword: admin
         currentAdminPassword: admin
