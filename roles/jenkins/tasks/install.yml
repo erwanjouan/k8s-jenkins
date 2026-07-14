@@ -11,11 +11,6 @@
       chart_ref: jenkins/jenkins
       wait: true
       values:
-        agent:
-          volumes:
-            - type: Secret
-              secretName: '{{ jenkins.m2_settings_secretname }}'
-              mountPath: /root/.m2
         controller:
           resources:
             requests:

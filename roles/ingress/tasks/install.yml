@@ -44,16 +44,6 @@
                       name: '{{ grafana.service_name }}'
                       port:
                         number: '{{ grafana.port }}'
-          - host: '{{ nexus.host }}'
-            http:
-              paths:
-                - path: /
-                  pathType: Prefix
-                  backend:
-                    service:
-                      name: '{{ nexus.service_name }}'
-                      port:
-                        number: '{{ nexus.port }}'
           - host: '{{ sonarqube.host }}'
             http:
               paths:

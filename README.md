@@ -20,7 +20,7 @@ helm show values jenkins
 The ingress uses host-based routing. Add the following entry to `/etc/hosts` so that `jenkins.local` and `grafana.local` resolve to the Docker Desktop ingress:
 
 ```shell
-sudo sh -c 'echo "127.0.0.1   jenkins.local grafana.local nexus.local" >> /etc/hosts'
+sudo sh -c 'echo "127.0.0.1   jenkins.local grafana.local nexus.local sonarqube.local" >> /etc/hosts'
 ```
 
 After deploy, services are available at:

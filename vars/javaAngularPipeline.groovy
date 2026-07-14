@@ -47,9 +47,6 @@ spec:
       volumeMounts:
         - mountPath: /root/jenkins_home
           name: jenkins-m2-cache
-        - mountPath: /root/.m2
-          name: m2-settings
-          readOnly: true
     - name: sonar-scanner
       image: sonarsource/sonar-scanner-cli
       command: [cat]
@@ -103,9 +100,6 @@ spec:
     - name: kaniko-secret
       secret:
         secretName: kaniko-config
-    - name: m2-settings
-      secret:
-        secretName: m2-settings
 """
             }
         }
